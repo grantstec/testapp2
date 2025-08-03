@@ -3,33 +3,132 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSND Document AI</title>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; background-color: #f4f7f6; }
-        h1 { text-align: center; }
-        #chatbox { border: 1px solid #ccc; min-height: 400px; padding: 15px; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .message { margin-bottom: 15px; }
-        .message strong { color: #007bff; }
-        .message.bot strong { color: #28a745; }
-        .message.bot .answer { white-space: pre-wrap; }
-        #input-area { display: flex; margin-top: 15px; }
-        #userInput { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-        #sendBtn { padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 5px; margin-left: 10px; cursor: pointer; }
-        #sendBtn.loading { background-color: #555; cursor: wait; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 0 15px;
+            background-color: #f4f7f6; 
+            color: #333;
+        }
+        h1 { 
+            text-align: center; 
+            color: #1a1a1a; 
+        }
+        #chatbox { 
+            border: 1px solid #ccc; 
+            min-height: 450px; 
+            padding: 15px; 
+            border-radius: 8px; 
+            background-color: #fff; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .message { 
+            margin-bottom: 20px; 
+            padding: 10px;
+            border-radius: 10px;
+            line-height: 1.5;
+            max-width: 85%;
+        }
+        .message.user {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+        .message.bot {
+            background-color: #e9ecef;
+            color: #333;
+            align-self: flex-start;
+        }
+        .message strong { 
+            display: block;
+            margin-bottom: 5px;
+        }
+        .message.bot strong {
+            color: #28a745;
+        }
+        .message .answer { 
+            white-space: pre-wrap; /* Respects newlines from the AI's response */
+        }
+        .bot-sources, .bot-images {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .bot-sources small, .bot-images small {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .bot-images img { 
+            max-width: 150px; 
+            max-height: 150px; 
+            margin-right: 10px; 
+            margin-bottom: 10px;
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .bot-images img:hover {
+            transform: scale(1.05);
+        }
+        #input-area { 
+            display: flex; 
+            margin-top: 20px; 
+        }
+        #userInput { 
+            flex-grow: 1; 
+            padding: 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            font-size: 16px;
+        }
+        #sendBtn { 
+            padding: 12px 20px; 
+            border: none; 
+            background-color: #007bff; 
+            color: white; 
+            border-radius: 5px; 
+            margin-left: 10px; 
+            cursor: pointer; 
+            font-size: 16px;
+        }
+        #sendBtn.loading { 
+            background-color: #555; 
+            cursor: wait; 
+        }
     </style>
 </head>
 <body>
+
     <h1>CSND Document Assistant</h1>
-    <div id="chatbox"><div class="message bot"><strong>Assistant:</strong> How can I help you?</div></div>
+    
+    <div id="chatbox">
+        <div class="message bot">
+            <strong>Assistant:</strong>
+            <div class="answer">How can I help you with the Standards and Duties document today?</div>
+        </div>
+    </div>
+    
     <div id="input-area">
         <input type="text" id="userInput" placeholder="Ask a question..." onkeydown="if(event.key==='Enter') sendMessage()">
         <button id="sendBtn" onclick="sendMessage()">Send</button>
     </div>
 
     <script>
-        // *** IMPORTANT ***
-        // Replace this URL with your PythonAnywhere backend URL.
-        const API_ENDPOINT = "https://yourusername.pythonanywhere.com/chat";
+        // --- IMPORTANT: PASTE YOUR BACKEND URL HERE ---
+        // Replace this with the URL you get from PythonAnywhere.
+        const API_ENDPOINT = "https://gdog.pythonanywhere.com/chat";
+
+        // This is the public folder on your website where the images are stored.
+        const IMAGE_BASE_URL = "/pdf_images/";
 
         const chatbox = document.getElementById('chatbox');
         const userInput = document.getElementById('userInput');
@@ -39,8 +138,11 @@
             const question = userInput.value.trim();
             if (!question || sendBtn.classList.contains('loading')) return;
 
-            chatbox.innerHTML += `<div class="message user"><strong>You:</strong> ${question}</div>`;
+            // Display user message
+            addMessage(question, 'user');
             userInput.value = '';
+            
+            // Show loading state
             sendBtn.innerText = '...';
             sendBtn.classList.add('loading');
 
@@ -50,17 +152,54 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ question: question })
                 });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
-                let botMessageHTML = `<div class="message bot"><strong>Assistant:</strong><div class="answer">${data.answer}</div></div>`;
-                chatbox.innerHTML += botMessageHTML;
+                addMessage(data, 'bot');
+
             } catch (error) {
-                chatbox.innerHTML += `<div class="message bot"><strong>Assistant:</strong> Error: Could not connect to the AI backend.</div>`;
+                const errorData = { answer: `Sorry, I encountered an error: ${error.message}` };
+                addMessage(errorData, 'bot');
             } finally {
+                // Restore button
                 sendBtn.innerText = 'Send';
                 sendBtn.classList.remove('loading');
-                chatbox.scrollTop = chatbox.scrollHeight;
+                chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the newest message
             }
         }
+
+        function addMessage(data, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            if (type === 'user') {
+                messageDiv.innerHTML = `<strong>You:</strong><div class="answer">${data}</div>`;
+            } else { // Bot message
+                let botHTML = `<strong>Assistant:</strong><div class="answer">${data.answer}</div>`;
+
+                // Add sources if they exist
+                if (data.sources && data.sources.length > 0) {
+                    botHTML += `<div class="bot-sources"><small>Sources:</small> ${data.sources.join(', ')}</div>`;
+                }
+
+                // Add images if they exist
+                if (data.images && data.images.length > 0) {
+                    botHTML += `<div class="bot-images"><small>Relevant Images:</small><br>`;
+                    data.images.forEach(imageFile => {
+                        const imageUrl = IMAGE_BASE_URL + imageFile;
+                        // Link to the image so user can click to see it full size
+                        botHTML += `<a href="${imageUrl}" target="_blank"><img src="${imageUrl}" alt="Relevant image from document"></a>`;
+                    });
+                    botHTML += `</div>`;
+                }
+                messageDiv.innerHTML = botHTML;
+            }
+            chatbox.appendChild(messageDiv);
+        }
     </script>
+
 </body>
 </html>
