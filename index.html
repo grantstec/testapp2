@@ -1,0 +1,66 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSND Document AI</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; background-color: #f4f7f6; }
+        h1 { text-align: center; }
+        #chatbox { border: 1px solid #ccc; min-height: 400px; padding: 15px; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .message { margin-bottom: 15px; }
+        .message strong { color: #007bff; }
+        .message.bot strong { color: #28a745; }
+        .message.bot .answer { white-space: pre-wrap; }
+        #input-area { display: flex; margin-top: 15px; }
+        #userInput { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        #sendBtn { padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 5px; margin-left: 10px; cursor: pointer; }
+        #sendBtn.loading { background-color: #555; cursor: wait; }
+    </style>
+</head>
+<body>
+    <h1>CSND Document Assistant</h1>
+    <div id="chatbox"><div class="message bot"><strong>Assistant:</strong> How can I help you?</div></div>
+    <div id="input-area">
+        <input type="text" id="userInput" placeholder="Ask a question..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <button id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        // *** IMPORTANT ***
+        // Replace this URL with your PythonAnywhere backend URL.
+        const API_ENDPOINT = "https://yourusername.pythonanywhere.com/chat";
+
+        const chatbox = document.getElementById('chatbox');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        async function sendMessage() {
+            const question = userInput.value.trim();
+            if (!question || sendBtn.classList.contains('loading')) return;
+
+            chatbox.innerHTML += `<div class="message user"><strong>You:</strong> ${question}</div>`;
+            userInput.value = '';
+            sendBtn.innerText = '...';
+            sendBtn.classList.add('loading');
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question })
+                });
+                const data = await response.json();
+                let botMessageHTML = `<div class="message bot"><strong>Assistant:</strong><div class="answer">${data.answer}</div></div>`;
+                chatbox.innerHTML += botMessageHTML;
+            } catch (error) {
+                chatbox.innerHTML += `<div class="message bot"><strong>Assistant:</strong> Error: Could not connect to the AI backend.</div>`;
+            } finally {
+                sendBtn.innerText = 'Send';
+                sendBtn.classList.remove('loading');
+                chatbox.scrollTop = chatbox.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
