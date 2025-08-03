@@ -7,22 +7,22 @@
     <title>Multi-Document AI Assistant</title>
     <style>
         /* All CSS from the previous full index.html file goes here */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 15px; background-color: #f4f7f6; color: #333; }
-        h1 { text-align: center; color: #1a1a1a; }
-        #chatbox { border: 1px solid #ccc; min-height: 450px; padding: 15px; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-y: auto; display: flex; flex-direction: column; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 15px; background-color: #323232; color: #333; }
+        h1 { text-align: center; color: #ffffff; }
+        #chatbox { border: 1px solid #4b4b4b; min-height: 450px; padding: 15px; border-radius: 8px; background-color: #4b4b4b; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-y: auto; display: flex; flex-direction: column; }
         .message { margin-bottom: 20px; padding: 10px; border-radius: 10px; line-height: 1.5; max-width: 85%; }
-        .message.user { background-color: #007bff; color: white; align-self: flex-end; }
-        .message.bot { background-color: #e9ecef; color: #333; align-self: flex-start; }
+        .message.user { background-color: #007bff; color: rgb(69, 69, 69); align-self: flex-end; }
+        .message.bot { background-color: #424242; color: #ffffff; align-self: flex-start; }
         .message .answer { white-space: pre-wrap; }
         .bot-sources, .bot-images { margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; }
         .bot-images img { max-width: 150px; margin: 5px; border-radius: 4px; }
         #input-area { display: flex; margin-top: 20px; }
         #userInput { flex-grow: 1; padding: 12px; border-radius: 5px; }
-        #sendBtn { padding: 12px 20px; border: none; background-color: #007bff; color: white; border-radius: 5px; margin-left: 10px; }
+        #sendBtn { padding: 12px 20px; border: none; background-color: #007bff; color: rgb(255, 255, 255); border-radius: 5px; margin-left: 10px; }
     </style>
 </head>
 <body>
-    <h1>Multi-Document AI Assistant</h1>
+    <h1>Multi-Document USAFA AI Assistant</h1>
     <div id="chatbox"></div>
     <div id="input-area">
         <input type="text" id="userInput" placeholder="Ask a question..." onkeydown="if(event.key==='Enter') sendMessage()">
