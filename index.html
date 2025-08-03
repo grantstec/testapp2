@@ -1,199 +1,66 @@
-<!-- index.html -->
+<!-- index.html (Final version) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSND Document AI</title>
+    <title>Multi-Document AI Assistant</title>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            max-width: 800px; 
-            margin: 20px auto; 
-            padding: 0 15px;
-            background-color: #000000; 
-            color: #515151;
-        }
-        h1 { 
-            text-align: center; 
-            color: #030303; 
-        }
-        #chatbox { 
-            border: 1px solid #363636; 
-            min-height: 450px; 
-            padding: 15px; 
-            border-radius: 8px; 
-            background-color: #262626; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .message { 
-            margin-bottom: 20px; 
-            padding: 10px;
-            border-radius: 10px;
-            line-height: 1.5;
-            max-width: 85%;
-        }
-        .message.user {
-            background-color: #007bff;
-            color: rgb(179, 179, 179);
-            align-self: flex-end;
-        }
-        .message.bot {
-            background-color: #464646;
-            color: #ffffff;
-            align-self: flex-start;
-        }
-        .message strong { 
-            display: block;
-            margin-bottom: 5px;
-        }
-        .message.bot strong {
-            color: #2d92ff;
-        }
-        .message .answer { 
-            white-space: pre-wrap; /* Respects newlines from the AI's response */
-        }
-        .bot-sources, .bot-images {
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-        }
-        .bot-sources small, .bot-images small {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-        .bot-images img { 
-            max-width: 150px; 
-            max-height: 150px; 
-            margin-right: 10px; 
-            margin-bottom: 10px;
-            border: 1px solid #ddd; 
-            border-radius: 4px; 
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .bot-images img:hover {
-            transform: scale(1.05);
-        }
-        #input-area { 
-            display: flex; 
-            margin-top: 20px; 
-        }
-        #userInput { 
-            flex-grow: 1; 
-            padding: 12px; 
-            border: 1px solid #ccc; 
-            background-color: #000000;
-            color: #ffffff;
-            border-radius: 5px; 
-            font-size: 16px;
-        }
-        #sendBtn { 
-            padding: 12px 20px; 
-            border: none; 
-            background-color: #007bff; 
-            color: white; 
-            border-radius: 5px; 
-            margin-left: 10px; 
-            cursor: pointer; 
-            font-size: 16px;
-        }
-        #sendBtn.loading { 
-            background-color: #555; 
-            cursor: wait; 
-        }
+        /* All CSS from the previous full index.html file goes here */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 15px; background-color: #f4f7f6; color: #333; }
+        h1 { text-align: center; color: #1a1a1a; }
+        #chatbox { border: 1px solid #ccc; min-height: 450px; padding: 15px; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-y: auto; display: flex; flex-direction: column; }
+        .message { margin-bottom: 20px; padding: 10px; border-radius: 10px; line-height: 1.5; max-width: 85%; }
+        .message.user { background-color: #007bff; color: white; align-self: flex-end; }
+        .message.bot { background-color: #e9ecef; color: #333; align-self: flex-start; }
+        .message .answer { white-space: pre-wrap; }
+        .bot-sources, .bot-images { margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; }
+        .bot-images img { max-width: 150px; margin: 5px; border-radius: 4px; }
+        #input-area { display: flex; margin-top: 20px; }
+        #userInput { flex-grow: 1; padding: 12px; border-radius: 5px; }
+        #sendBtn { padding: 12px 20px; border: none; background-color: #007bff; color: white; border-radius: 5px; margin-left: 10px; }
     </style>
 </head>
 <body>
-
-    <h1>CSND Document Assistant</h1>
-    
-    <div id="chatbox">
-        <div class="message bot">
-            <strong>Assistant:</strong>
-            <div class="answer">How can I help you with the Cadet Documents Today?</div>
-        </div>
-    </div>
-    
+    <h1>Multi-Document AI Assistant</h1>
+    <div id="chatbox"></div>
     <div id="input-area">
         <input type="text" id="userInput" placeholder="Ask a question..." onkeydown="if(event.key==='Enter') sendMessage()">
         <button id="sendBtn" onclick="sendMessage()">Send</button>
     </div>
 
     <script>
-        // --- IMPORTANT: PASTE YOUR BACKEND URL HERE ---
-        // Replace this with the URL you get from PythonAnywhere.
         const API_ENDPOINT = "https://gdog.pythonanywhere.com/chat";
+        // This base URL points to the master folder in your GitHub repo
+        const IMAGE_BASE_URL = "/all_images/";
 
-        // This is the public folder on your website where the images are stored.
-        const IMAGE_BASE_URL = "/";
-
+        // The addMessage and sendMessage JS functions are identical to the 
+        // full-featured version from before. The key is that the backend now
+        // provides the correct relative path (e.g., "CSND/p5_img0.png"),
+        // and this frontend will correctly construct the full URL.
+        function addMessage(data, type) { /* ... Same as before ... */ }
+        async function sendMessage() { /* ... Same as before ... */ }
+        
+        // --- Full JavaScript for copy-paste convenience ---
         const chatbox = document.getElementById('chatbox');
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
 
-        async function sendMessage() {
-            const question = userInput.value.trim();
-            if (!question || sendBtn.classList.contains('loading')) return;
-
-            // Display user message
-            addMessage(question, 'user');
-            userInput.value = '';
-            
-            // Show loading state
-            sendBtn.innerText = '...';
-            sendBtn.classList.add('loading');
-
-            try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: question })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API Error: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                addMessage(data, 'bot');
-
-            } catch (error) {
-                const errorData = { answer: `Sorry, I encountered an error: ${error.message}` };
-                addMessage(errorData, 'bot');
-            } finally {
-                // Restore button
-                sendBtn.innerText = 'Send';
-                sendBtn.classList.remove('loading');
-                chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the newest message
-            }
-        }
-
         function addMessage(data, type) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}`;
-
             if (type === 'user') {
                 messageDiv.innerHTML = `<strong>You:</strong><div class="answer">${data}</div>`;
-            } else { // Bot message
+            } else {
                 let botHTML = `<strong>Assistant:</strong><div class="answer">${data.answer}</div>`;
-
-                // Add sources if they exist
                 if (data.sources && data.sources.length > 0) {
-                    botHTML += `<div class="bot-sources"><small>Sources:</small> ${data.sources.join(', ')}</div>`;
+                    botHTML += `<div class="bot-sources"><small>Sources:</small> ${data.sources.join('; ')}</div>`;
                 }
-
-                // Add images if they exist
                 if (data.images && data.images.length > 0) {
                     botHTML += `<div class="bot-images"><small>Relevant Images:</small><br>`;
-                    data.images.forEach(imageFile => {
-                        const imageUrl = IMAGE_BASE_URL + imageFile;
-                        // Link to the image so user can click to see it full size
-                        botHTML += `<a href="${imageUrl}" target="_blank"><img src="${imageUrl}" alt="Relevant image from document"></a>`;
+                    data.images.forEach(imagePath => {
+                        const imageUrl = IMAGE_BASE_URL + imagePath;
+                        botHTML += `<a href="${imageUrl}" target="_blank"><img src="${imageUrl}" alt="${imagePath}"></a>`;
                     });
                     botHTML += `</div>`;
                 }
@@ -201,7 +68,31 @@
             }
             chatbox.appendChild(messageDiv);
         }
-    </script>
 
+        async function sendMessage() {
+            const question = userInput.value.trim();
+            if (!question || sendBtn.classList.contains('loading')) return;
+            addMessage(question, 'user');
+            userInput.value = '';
+            sendBtn.innerText = '...';
+            sendBtn.classList.add('loading');
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question })
+                });
+                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                const data = await response.json();
+                addMessage(data, 'bot');
+            } catch (error) {
+                addMessage({ answer: `An error occurred: ${error.message}` }, 'bot');
+            } finally {
+                sendBtn.innerText = 'Send';
+                sendBtn.classList.remove('loading');
+                chatbox.scrollTop = chatbox.scrollHeight;
+            }
+        }
+    </script>
 </body>
 </html>
